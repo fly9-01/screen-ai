@@ -17,14 +17,14 @@ export async function startCapture() {
   stream.getVideoTracks()[0].addEventListener("ended", () => endedCbs.forEach((cb) => cb()));
 
   return {
-    async grabJpegBase64() {
+    async grabJpegBase64(maxEdge = MAX_EDGE, quality = 0.85) {
       const w = video.videoWidth;
       const h = video.videoHeight;
-      const scale = Math.min(1, MAX_EDGE / Math.max(w, h));
+      const scale = Math.min(1, maxEdge / Math.max(w, h));
       canvas.width = Math.round(w * scale);
       canvas.height = Math.round(h * scale);
       canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-      return canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
+      return canvas.toDataURL("image/jpeg", quality).split(",")[1];
     },
     grabSmallRgba() {
       const ctx = small.getContext("2d", { willReadFrequently: true });

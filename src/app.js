@@ -1,5 +1,5 @@
 import { loadSettings, saveSettings } from "./settings.js";
-import { askClaude } from "./claude.js";
+import { askClaude, askClaudeStream } from "./claude.js";
 import { startCapture } from "./capture.js";
 import { createWatcher } from "./watcher.js";
 import { chooseEngine } from "./engine.js";
@@ -61,10 +61,13 @@ async function ask() {
   el.spinner.hidden = false;
   el.ask.disabled = true;
   try {
-    const img = await capture.grabJpegBase64();
+    const instant = settings.mode === "instant";
+    const img = instant ? await capture.grabJpegBase64(1024, 0.7) : await capture.grabJpegBase64();
     const engine = chooseEngine(settings);
     el.status.textContent = engine === "claude" ? "Engine: Claude" : "Engine: free local model (first run downloads it)";
-    const text = engine === "claude"
+    const text = engine === "claude" && instant
+      ? await askClaudeStream(settings.apiKey, img, (t) => show(t))
+      : engine === "claude"
       ? await askClaude(settings.apiKey, settings.mode, img)
       : await askLocal(img, (pct) => {
           el.progress.hidden = pct >= 100;

@@ -1,5 +1,5 @@
 const KEY = "screenai.settings";
-export const DEFAULT_SETTINGS = { apiKey: "", mode: "fast", watch: false };
+export const DEFAULT_SETTINGS = { apiKey: "", mode: "instant", watch: false };
 
 export function loadSettings(storage) {
   try {
