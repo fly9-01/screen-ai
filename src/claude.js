@@ -1,6 +1,8 @@
 export const PROMPT =
-  "Look carefully at this screenshot, find the question on screen, and answer it directly and accurately. " +
-  "Read every detail (numbers, options, units) before answering. Be concise. " +
+  "You are a patient tutor. Look carefully at this screenshot and find the question on screen. " +
+  "Read every detail (numbers, options, units). First explain the key idea needed, step by step. " +
+  "Then explain why the correct answer is right and why each of the other options is wrong. " +
+  "End with the answer on its own line. Keep it short and clear. " +
   "If no question is visible, say so plainly.";
 
 const MODELS = { fast: "claude-haiku-5-5", detailed: "claude-sonnet-5-5" };

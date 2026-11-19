@@ -31,7 +31,7 @@ export async function askLocal(imageBase64, onProgress = () => {}) {
   const text = processor.apply_chat_template(messages, { add_generation_prompt: true });
   const image = await tf.load_image(`data:image/jpeg;base64,${imageBase64}`);
   const inputs = await processor(text, [image], { do_image_splitting: false });
-  const out = await model.generate({ ...inputs, max_new_tokens: 256 });
+  const out = await model.generate({ ...inputs, max_new_tokens: 512 });
   const [decoded] = processor.batch_decode(out.slice(null, [inputs.input_ids.dims.at(-1), null]), {
     skip_special_tokens: true,
   });

@@ -64,3 +64,9 @@ test("key with invalid header characters gets a clear error", async () => {
 test("max_tokens leaves room for thinking", () => {
   assert.ok(JSON.parse(buildRequest("k", "fast", "A").init.body).max_tokens >= 4096);
 });
+
+test("prompt asks for an explanation of why, including why other options are wrong", () => {
+  assert.match(PROMPT, /explain/i);
+  assert.match(PROMPT, /why/i);
+  assert.match(PROMPT, /other options|wrong/i);
+});

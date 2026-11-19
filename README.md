@@ -1,6 +1,6 @@
 # Screen AI
 
-A website that watches a shared screen, reads the question on it, and answers it.
+A study helper website: it reads a question on your shared screen and explains why the answer is right and why the other options are wrong.
 No install needed: it is a static site.
 
 ## Run locally
