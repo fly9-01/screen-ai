@@ -4,7 +4,7 @@ export async function startCapture() {
   if (!navigator.mediaDevices?.getDisplayMedia) {
     throw new Error("Screen sharing isn't supported in this browser. Use Chrome or Edge on desktop.");
   }
-  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false, selfBrowserSurface: "exclude" });
   const video = document.createElement("video");
   video.srcObject = stream;
   video.muted = true;

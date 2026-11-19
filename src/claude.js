@@ -18,7 +18,7 @@ export function buildRequest(apiKey, mode, imageBase64) {
       },
       body: JSON.stringify({
         model: MODELS[mode] ?? MODELS.fast,
-        max_tokens: 1024,
+        max_tokens: 4096,
         messages: [{
           role: "user",
           content: [
@@ -33,10 +33,17 @@ export function buildRequest(apiKey, mode, imageBase64) {
 
 export function parseAnswer(json) {
   if (json?.error) throw new Error(json.error.message ?? "API error");
-  return (json?.content ?? []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
+  const text = (json?.content ?? []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
+  if (!text.trim()) {
+    throw new Error(`No answer returned (stop reason: ${json?.stop_reason ?? "unknown"}). Try again.`);
+  }
+  return text;
 }
 
 export async function askClaude(apiKey, mode, imageBase64, fetchImpl = fetch) {
+  if (!/^[!-~]+$/.test(apiKey)) {
+    throw new Error("API key contains invalid characters. Re-paste it without spaces or quotes.");
+  }
   const { url, init } = buildRequest(apiKey, mode, imageBase64);
   let res;
   try {
@@ -46,6 +53,14 @@ export async function askClaude(apiKey, mode, imageBase64, fetchImpl = fetch) {
   }
   if (res.status === 401) throw new Error("Invalid API key");
   if (res.status === 429) throw new Error("Rate limited, try again");
-  if (!res.ok) throw new Error(`Claude request failed (HTTP ${res.status})`);
+  if (!res.ok) {
+    let detail = "";
+    try {
+      detail = (await res.json())?.error?.message ?? "";
+    } catch {
+      /* body not JSON */
+    }
+    throw new Error(detail ? `Claude error: ${detail}` : `Claude request failed (HTTP ${res.status})`);
+  }
   return parseAnswer(await res.json());
 }

@@ -44,3 +44,23 @@ test("network failure mentions network", async () => {
 test("success returns answer text", async () => {
   assert.equal(await askClaude("k", "fast", "A", ok({ content: [{ type: "text", text: "42" }] })), "42");
 });
+
+test("non-OK response surfaces the API error message", async () => {
+  const f = async () => ({ ok: false, status: 400, json: async () => ({ error: { message: "credit balance is too low" } }) });
+  await assert.rejects(askClaude("k", "fast", "A", f), /credit balance is too low/);
+});
+test("response with no text and max_tokens stop reason is an error, not blank", async () => {
+  await assert.rejects(
+    askClaude("k", "fast", "A", ok({ content: [{ type: "thinking" }], stop_reason: "max_tokens" })),
+    /No answer/,
+  );
+});
+test("refusal stop reason is an error", async () => {
+  await assert.rejects(askClaude("k", "fast", "A", ok({ content: [], stop_reason: "refusal" })), /No answer/);
+});
+test("key with invalid header characters gets a clear error", async () => {
+  await assert.rejects(askClaude("sk-“bad", "fast", "A", ok({ content: [] })), /invalid characters/i);
+});
+test("max_tokens leaves room for thinking", () => {
+  assert.ok(JSON.parse(buildRequest("k", "fast", "A").init.body).max_tokens >= 4096);
+});

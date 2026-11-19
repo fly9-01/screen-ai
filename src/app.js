@@ -95,6 +95,7 @@ el.share.addEventListener("click", async () => {
       setSharing(false);
     });
     setSharing(true);
+    el.share.blur();
   } catch (e) {
     show(e.message, true);
   }
@@ -110,6 +111,7 @@ el.copy.addEventListener("click", () => navigator.clipboard?.writeText(el.answer
 el.watch.addEventListener("change", () => {
   if (el.watch.checked && capture) {
     watcher = createWatcher({ intervalMs: 1500, grabSmallRgba: () => capture.grabSmallRgba(), onChange: ask });
+    watcher.setBusy(busy);
     watcher.start();
   } else {
     stopWatching();
