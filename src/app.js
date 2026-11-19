@@ -1,6 +1,7 @@
 import { loadSettings, saveSettings } from "./settings.js";
 import { askClaude } from "./claude.js";
 import { startCapture } from "./capture.js";
+import { createWatcher } from "./watcher.js";
 
 const $ = (id) => document.getElementById(id);
 const el = {
@@ -16,6 +17,7 @@ el.apikey.value = settings.apiKey;
 el.mode.value = settings.mode;
 let capture = null;
 let busy = false;
+let watcher = null;
 
 function persist() {
   settings.apiKey = el.apikey.value.trim();
@@ -35,13 +37,22 @@ function setSharing(on) {
   el.ask.disabled = !on;
   el.watch.disabled = !on;
   el.share.textContent = on ? "Stop sharing" : "Share screen";
-  if (!on) el.watch.checked = false;
+  if (!on) {
+    el.watch.checked = false;
+    stopWatching();
+  }
+}
+
+function stopWatching() {
+  watcher?.stop();
+  watcher = null;
 }
 
 async function ask() {
   if (!capture || busy) return;
   persist();
   busy = true;
+  watcher?.setBusy(true);
   el.spinner.hidden = false;
   el.ask.disabled = true;
   try {
@@ -51,6 +62,7 @@ async function ask() {
     show(e.message, true);
   } finally {
     busy = false;
+    watcher?.setBusy(false);
     el.spinner.hidden = true;
     el.ask.disabled = !capture;
   }
@@ -82,3 +94,11 @@ document.addEventListener("keydown", (e) => {
   }
 });
 el.copy.addEventListener("click", () => navigator.clipboard?.writeText(el.answer.textContent));
+el.watch.addEventListener("change", () => {
+  if (el.watch.checked && capture) {
+    watcher = createWatcher({ intervalMs: 1500, grabSmallRgba: () => capture.grabSmallRgba(), onChange: ask });
+    watcher.start();
+  } else {
+    stopWatching();
+  }
+});
