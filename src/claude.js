@@ -6,8 +6,12 @@ export const PROMPT =
   "If no question is visible, say so plainly.";
 
 export const QUICK_PROMPT =
-  "Find the question on screen. Reply with ONLY the final answer on the first line, formatted as 'Answer: <answer>'. " +
-  "Then give one short sentence of reason. No preamble. If no question is visible, say 'No question visible'.";
+  "Find the question on screen and SOLVE it. Never repeat or restate the question. " +
+  "The screen usually shows answer choices (often at the bottom). There may be anywhere from 2 to 4 of them " +
+  "(e.g. A-D, A-B, True/False, or 1-4): count the ones actually visible, read every one, and pick exactly one of those. " +
+  "Never invent an option that isn't shown. Do any math or reasoning silently, then reply on the first line as " +
+  "'Answer: <label>) <option text>' using the option's own label as shown. If there are no choices, give the answer as 'Answer: <answer>'. " +
+  "Then one short sentence of reason. No preamble. If no question is visible, say 'No question visible'.";
 
 const MODELS = { instant: "claude-haiku-5-5", fast: "claude-haiku-5-5", detailed: "claude-sonnet-5-5" };
 
@@ -24,7 +28,7 @@ export function buildRequest(apiKey, mode, imageBase64) {
       },
       body: JSON.stringify({
         model: MODELS[mode] ?? MODELS.fast,
-        max_tokens: mode === "instant" ? 200 : 4096,
+        max_tokens: mode === "instant" ? 400 : 4096,
         ...(mode === "instant" ? { stream: true } : {}),
         messages: [{
           role: "user",
