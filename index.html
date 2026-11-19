@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screen AI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <h1>Screen AI</h1>
+    <p class="sub">Share your screen. It reads the question and answers it.</p>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <section class="controls">
+    <button id="share" class="primary">Share screen</button>
+    <button id="ask" disabled>Ask <kbd>Space</kbd></button>
+    <label class="toggle"><input type="checkbox" id="watch" disabled> Watch mode</label>
+    <button id="popout" disabled>Pop out answer</button>
+  </section>
+
+  <section class="answer-wrap">
+    <div class="answer-head">
+      <span>Answer</span>
+      <span id="spinner" class="spinner" hidden></span>
+      <button id="copy" class="ghost" disabled>Copy</button>
+    </div>
+    <pre id="answer" aria-live="polite">Share your screen, then press Ask.</pre>
+  </section>
+
+  <section class="settings">
+    <h2>Settings</h2>
+    <label>Anthropic API key (optional)
+      <input id="apikey" type="password" placeholder="sk-ant-... (leave empty to use the free local model)" autocomplete="off">
+    </label>
+    <label>Quality
+      <select id="mode">
+        <option value="fast">Fast (Haiku)</option>
+        <option value="detailed">Detailed (Sonnet)</option>
+      </select>
+    </label>
+    <p class="note">Your key is stored only in this browser and sent straight to Anthropic. Do not use it on shared computers.</p>
+    <p id="status" class="status"></p>
+    <div id="progress" class="progress" hidden><div id="bar"></div></div>
+  </section>
+</main>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

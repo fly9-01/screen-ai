@@ -1,0 +1,84 @@
+import { loadSettings, saveSettings } from "./settings.js";
+import { askClaude } from "./claude.js";
+import { startCapture } from "./capture.js";
+
+const $ = (id) => document.getElementById(id);
+const el = {
+  share: $("share"), ask: $("ask"), watch: $("watch"), popout: $("popout"), copy: $("copy"),
+  answer: $("answer"), spinner: $("spinner"), apikey: $("apikey"), mode: $("mode"),
+  status: $("status"), banner: $("banner"), progress: $("progress"), bar: $("bar"),
+};
+
+let storage = null;
+try { storage = window.localStorage; } catch { /* blocked */ }
+const settings = loadSettings(storage ?? { getItem() { throw new Error("none"); }, setItem() { throw new Error("none"); } });
+el.apikey.value = settings.apiKey;
+el.mode.value = settings.mode;
+let capture = null;
+let busy = false;
+
+function persist() {
+  settings.apiKey = el.apikey.value.trim();
+  settings.mode = el.mode.value;
+  if (storage) saveSettings(storage, settings);
+}
+el.apikey.addEventListener("change", persist);
+el.mode.addEventListener("change", persist);
+
+function show(text, isError = false) {
+  el.answer.textContent = text;
+  el.answer.classList.toggle("error", isError);
+  el.copy.disabled = isError || !text;
+}
+
+function setSharing(on) {
+  el.ask.disabled = !on;
+  el.watch.disabled = !on;
+  el.share.textContent = on ? "Stop sharing" : "Share screen";
+  if (!on) el.watch.checked = false;
+}
+
+async function ask() {
+  if (!capture || busy) return;
+  persist();
+  busy = true;
+  el.spinner.hidden = false;
+  el.ask.disabled = true;
+  try {
+    const img = await capture.grabJpegBase64();
+    show(await askClaude(settings.apiKey, settings.mode, img));
+  } catch (e) {
+    show(e.message, true);
+  } finally {
+    busy = false;
+    el.spinner.hidden = true;
+    el.ask.disabled = !capture;
+  }
+}
+
+el.share.addEventListener("click", async () => {
+  if (capture) {
+    capture.stop();
+    capture = null;
+    setSharing(false);
+    return;
+  }
+  try {
+    capture = await startCapture();
+    capture.onEnded(() => {
+      capture = null;
+      setSharing(false);
+    });
+    setSharing(true);
+  } catch (e) {
+    show(e.message, true);
+  }
+});
+el.ask.addEventListener("click", ask);
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && !["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(e.target.tagName)) {
+    e.preventDefault();
+    ask();
+  }
+});
+el.copy.addEventListener("click", () => navigator.clipboard?.writeText(el.answer.textContent));
