@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screen AI - How it works</title>
+<style>
+  body { margin:0; background:#0f1117; color:#e8eaf0; font:16px/1.6 system-ui,"Segoe UI",sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { margin:0 0 4px; } h2 { margin:32px 0 8px; font-size:1.2rem; color:#6ea8ff; }
+  p { margin:8px 0; } .sub { color:#9aa3b5; }
+  .flow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:16px 0; }
+  .box { background:#181b24; border:1px solid #2a2f3d; border-radius:10px; padding:10px 14px; }
+  .arrow { color:#6ea8ff; }
+  ul { padding-left:20px; } li { margin:6px 0; }
+  code { background:#181b24; border:1px solid #2a2f3d; border-radius:4px; padding:1px 6px; }
+  a { color:#6ea8ff; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Screen AI</h1>
+  <p class="sub">An AI tutor that reads the question on your screen and explains why the answer is right.</p>
+
+  <h2>The idea</h2>
+  <p>You share your screen. Screen AI looks at it, finds the question, and explains the key idea step by step, why the correct answer is right, and why each other option is wrong. It ends with the answer on its own line.</p>
+
+  <h2>How it works</h2>
+  <div class="flow">
+    <div class="box">1. Share screen</div><span class="arrow">&rarr;</span>
+    <div class="box">2. Take a screenshot</div><span class="arrow">&rarr;</span>
+    <div class="box">3. AI reads it</div><span class="arrow">&rarr;</span>
+    <div class="box">4. Explanation appears</div>
+  </div>
+  <ul>
+    <li><b>Capture:</b> the browser's built-in screen sharing. You pick a tab or window once.</li>
+    <li><b>Shrink:</b> the screenshot is scaled down (longest side 1568 px) and saved as a JPEG.</li>
+    <li><b>Ask:</b> press the Ask button or <code>Space</code>. The image goes to the AI with a tutor prompt.</li>
+    <li><b>Watch mode:</b> checks the screen every 1.5 seconds with a cheap pixel comparison. It only asks the AI when the picture changes, and never sends two requests at once.</li>
+    <li><b>Pop out:</b> a small floating window keeps the explanation visible while you work in another tab.</li>
+  </ul>
+
+  <h2>Two AI engines</h2>
+  <ul>
+    <li><b>Claude (with your API key):</b> Fast mode uses Haiku 5.5, Detailed mode uses Sonnet 5.5. The key is stored only in your browser and sent straight to Anthropic.</li>
+    <li><b>Free local model (no key):</b> a small open-source vision model (SmolVLM) runs inside your browser using WebGPU. The first use downloads it, then it is cached. Slower and less accurate than Claude.</li>
+  </ul>
+
+  <h2>What it is built with</h2>
+  <ul>
+    <li>Plain HTML, CSS and JavaScript. No backend, no accounts, nothing to install.</li>
+    <li>Browser screen capture, the Anthropic Messages API, and Transformers.js for the free model.</li>
+    <li>Works best in Chrome or Edge on a desktop.</li>
+  </ul>
+
+  <h2>Where things are</h2>
+  <ul>
+    <li>Live site: <a href="https://fly9-01.github.io/screen-ai/">fly9-01.github.io/screen-ai</a></li>
+    <li>Code: <a href="https://github.com/fly9-01/screen-ai">github.com/fly9-01/screen-ai</a></li>
+    <li>Project folder: <code>C:\Users\jhoss\screen-ai</code></li>
+  </ul>
+
+  <h2>Good to know</h2>
+  <ul>
+    <li>Share a specific tab or window, not the whole screen, so the app does not read its own answers.</li>
+    <li>Screen sharing, Watch mode and the free model have not been tested in a browser yet. Try the live site once before presenting.</li>
+  </ul>
+</main>
+</body>
+</html>
