@@ -2,6 +2,9 @@ import { loadSettings, saveSettings } from "./settings.js";
 import { askClaude } from "./claude.js";
 import { startCapture } from "./capture.js";
 import { createWatcher } from "./watcher.js";
+import { chooseEngine } from "./engine.js";
+import { askLocal } from "./local.js";
+import { openOverlay } from "./overlay.js";
 
 const $ = (id) => document.getElementById(id);
 const el = {
@@ -18,6 +21,7 @@ el.mode.value = settings.mode;
 let capture = null;
 let busy = false;
 let watcher = null;
+let overlay = null;
 
 function persist() {
   settings.apiKey = el.apikey.value.trim();
@@ -30,6 +34,7 @@ el.mode.addEventListener("change", persist);
 function show(text, isError = false) {
   el.answer.textContent = text;
   el.answer.classList.toggle("error", isError);
+  overlay?.setText(text);
   el.copy.disabled = isError || !text;
 }
 
@@ -57,7 +62,15 @@ async function ask() {
   el.ask.disabled = true;
   try {
     const img = await capture.grabJpegBase64();
-    show(await askClaude(settings.apiKey, settings.mode, img));
+    const engine = chooseEngine(settings);
+    el.status.textContent = engine === "claude" ? "Engine: Claude" : "Engine: free local model (first run downloads it)";
+    const text = engine === "claude"
+      ? await askClaude(settings.apiKey, settings.mode, img)
+      : await askLocal(img, (pct) => {
+          el.progress.hidden = pct >= 100;
+          el.bar.style.width = pct + "%";
+        });
+    show(text);
   } catch (e) {
     show(e.message, true);
   } finally {
@@ -101,4 +114,15 @@ el.watch.addEventListener("change", () => {
   } else {
     stopWatching();
   }
+});
+
+if (!navigator.mediaDevices?.getDisplayMedia) {
+  el.banner.hidden = false;
+  el.banner.textContent = "Screen sharing is not supported here. Use Chrome or Edge on a desktop.";
+}
+el.popout.disabled = false;
+el.popout.addEventListener("click", async () => {
+  overlay = await openOverlay();
+  if (!overlay) show("Pop-out is not supported in this browser. The answer stays on this page.", true);
+  else overlay.setText(el.answer.textContent);
 });
