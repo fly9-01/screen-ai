@@ -62,7 +62,7 @@ async function ask() {
   el.ask.disabled = true;
   try {
     const instant = settings.mode === "instant";
-    const img = instant ? await capture.grabJpegBase64(1024, 0.7) : await capture.grabJpegBase64();
+    const img = instant ? await capture.grabJpegBase64(1568, 0.8) : await capture.grabJpegBase64();
     const engine = chooseEngine(settings);
     el.status.textContent = engine === "claude" ? "Engine: Claude" : "Engine: free local model (first run downloads it)";
     const text = engine === "claude" && instant
@@ -105,8 +105,9 @@ el.share.addEventListener("click", async () => {
 });
 el.ask.addEventListener("click", ask);
 document.addEventListener("keydown", (e) => {
-  if (e.code === "Space" && !["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(e.target.tagName)) {
+  if (e.code === "Space" && !(e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox"))) {
     e.preventDefault();
+    e.target.blur?.();
     ask();
   }
 });
